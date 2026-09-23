@@ -1,0 +1,6 @@
+create or replace function public.can_manage_school(target_school uuid) returns boolean language sql stable security definer set search_path=public as $$ select exists(select 1 from public.school_memberships m where m.school_id=target_school and m.user_id=auth.uid() and m.active and m.role in ('school_owner','principal','reception')); $$;
+create policy "manage classes" on public.classes for all using(public.can_manage_school(school_id)) with check(public.can_manage_school(school_id));
+create policy "manage sections" on public.sections for all using(public.can_manage_school(school_id)) with check(public.can_manage_school(school_id));
+create policy "manage students" on public.students for all using(public.can_manage_school(school_id)) with check(public.can_manage_school(school_id));
+create policy "manage enrollments" on public.student_enrollments for all using(public.can_manage_school(school_id)) with check(public.can_manage_school(school_id));
+create policy "manage years" on public.academic_years for all using(public.can_manage_school(school_id)) with check(public.can_manage_school(school_id));
