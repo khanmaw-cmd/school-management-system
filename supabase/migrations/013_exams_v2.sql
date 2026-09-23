@@ -1,0 +1,14 @@
+create table public.grade_scales(id uuid primary key default gen_random_uuid(),school_id uuid not null references public.schools(id) on delete cascade,name text not null,min_percentage numeric(5,2) not null,max_percentage numeric(5,2) not null,grade text not null,remark text,sort_order int not null default 0,created_at timestamptz not null default now(),check(min_percentage>=0 and max_percentage<=100 and min_percentage<=max_percentage),unique(school_id,name,grade));
+alter table public.grade_scales enable row level security;
+create policy "read grade scales" on public.grade_scales for select to authenticated using(public.is_school_member(school_id));
+create policy "manage grade scales" on public.grade_scales for all to authenticated using(public.has_school_role(school_id,array['school_owner','principal']::public.school_role[])) with check(public.has_school_role(school_id,array['school_owner','principal']::public.school_role[]));
+alter table public.exam_subjects add constraint exam_subject_marks_valid check(max_marks>0 and pass_marks>=0 and pass_marks<=max_marks);
+alter table public.exam_marks add constraint exam_marks_nonnegative check(marks is null or marks>=0);
+create index if not exists exam_marks_student_idx on public.exam_marks(student_id,exam_subject_id);
+create index if not exists exam_subject_exam_class_idx on public.exam_subjects(exam_id,class_id);
+drop policy if exists "read marks" on public.exam_marks;
+create policy "read marks" on public.exam_marks for select to authenticated using(public.can_mark_academics(school_id) or public.can_view_student(student_id));
+drop policy if exists "read exams" on public.exams;
+create policy "read exams" on public.exams for select to authenticated using(public.can_mark_academics(school_id) or (public.is_school_member(school_id) and published=true));
+drop policy if exists "read exam subjects" on public.exam_subjects;
+create policy "read exam subjects" on public.exam_subjects for select to authenticated using(public.is_school_member(school_id));
