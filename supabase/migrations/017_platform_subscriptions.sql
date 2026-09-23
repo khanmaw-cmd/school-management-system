@@ -15,3 +15,8 @@ insert into public.subscription_plans(code,name,monthly_price,student_limit,staf
 ('growth','Growth',1999,1000,100,'{"attendance":true,"fees":true,"exams":true,"portal":true,"communications":true,"documents":true}'::jsonb),
 ('enterprise','Enterprise',4999,null,null,'{"all_core":true,"priority_support":true,"future_integrations":true}'::jsonb)
 on conflict(code) do nothing;
+-- Platform-level read access is deliberately separate from tenant membership.
+create policy "platform admins read schools" on public.schools for select to authenticated using(public.is_platform_admin());
+create policy "platform admins read students" on public.students for select to authenticated using(public.is_platform_admin());
+create policy "platform admins read memberships" on public.school_memberships for select to authenticated using(public.is_platform_admin());
+create policy "platform admins read staff" on public.staff for select to authenticated using(public.is_platform_admin());
