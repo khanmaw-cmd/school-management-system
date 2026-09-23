@@ -1,0 +1,3 @@
+"use server";
+import {revalidatePath} from "next/cache";import {createClient} from "@/lib/supabase/server";
+export async function addYear(f:FormData){const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)throw new Error("Unauthorized");const {data:m}=await s.from("school_memberships").select("school_id").eq("user_id",user.id).eq("active",true).limit(1).single();const id=m!.school_id;const active=f.get("active")==="on";if(active)await s.from("academic_years").update({active:false}).eq("school_id",id);await s.from("academic_years").insert({school_id:id,name:String(f.get("name")),starts_on:String(f.get("starts_on")),ends_on:String(f.get("ends_on")),active});revalidatePath("/admin/academic-years");}
