@@ -1,0 +1,3 @@
+"use server";
+import {revalidatePath} from "next/cache";import {createClient} from "@/lib/supabase/server";
+export async function addTeacher(f:FormData){const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)throw new Error("Unauthorized");const {data:m}=await s.from("school_memberships").select("school_id").eq("user_id",user.id).eq("active",true).limit(1).single();await s.from("staff").insert({school_id:m!.school_id,employee_no:String(f.get("employee_no")),full_name:String(f.get("full_name")),email:String(f.get("email")||"")||null,phone:String(f.get("phone")||"")||null,designation:"Teacher"});revalidatePath("/admin/teachers");}
