@@ -1,0 +1,2 @@
+"use server";import {revalidatePath} from "next/cache";import {createClient} from "@/lib/supabase/server";
+export async function addSubject(f:FormData){const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)throw new Error("Unauthorized");const {data:m}=await s.from("school_memberships").select("school_id").eq("user_id",user.id).eq("active",true).limit(1).single();await s.from("subjects").insert({school_id:m!.school_id,name:String(f.get("name")).trim(),code:String(f.get("code")||"").trim()||null});revalidatePath("/admin/subjects");}
