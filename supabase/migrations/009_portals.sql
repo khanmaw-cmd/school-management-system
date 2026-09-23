@@ -1,0 +1,10 @@
+alter table public.guardians add column if not exists user_id uuid references auth.users(id);
+alter table public.students add column if not exists user_id uuid references auth.users(id);
+create index if not exists guardians_user_id_idx on public.guardians(user_id);
+create index if not exists students_user_id_idx on public.students(user_id);
+create or replace function public.can_view_student(target_student uuid) returns boolean language sql stable security definer set search_path=public as $$ select exists(select 1 from public.students s where s.id=target_student and s.user_id=auth.uid()) or exists(select 1 from public.guardians g where g.student_id=target_student and g.user_id=auth.uid()) or exists(select 1 from public.students s join public.school_memberships m on m.school_id=s.school_id where s.id=target_student and m.user_id=auth.uid() and m.active=true); $$;
+create policy "portal read student" on public.students for select using(public.can_view_student(id));
+create policy "portal read attendance" on public.student_attendance for select using(public.can_view_student(student_id));
+create policy "portal read fee assignments" on public.student_fee_assignments for select using(public.can_view_student(student_id));
+create policy "portal read fee payments" on public.fee_payments for select using(public.can_view_student(student_id));
+create policy "portal read exam marks" on public.exam_marks for select using(public.can_view_student(student_id));
