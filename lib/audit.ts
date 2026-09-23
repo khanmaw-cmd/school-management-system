@@ -1,0 +1,3 @@
+import type {SupabaseClient} from "@supabase/supabase-js";
+export async function audit(s:SupabaseClient,row:{school_id:string;actor_user_id:string;action:string;entity_type:string;entity_id?:string|null;summary:string;metadata?:Record<string,unknown>}){const {error}=await s.from("audit_logs").insert({...row,metadata:row.metadata||{}});if(error)console.error("Audit log failed",error.message)}
+export async function notify(s:SupabaseClient,row:{school_id:string;user_id?:string|null;student_id?:string|null;type:string;title:string;body:string;link?:string|null}){const {error}=await s.from("notifications").insert(row);if(error)console.error("Notification failed",error.message)}
