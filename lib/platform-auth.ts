@@ -1,0 +1,2 @@
+import {redirect} from "next/navigation";import {createClient} from "@/lib/supabase/server";
+export async function requirePlatformAdmin(){const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect("/login?next=/platform");const {data:ok,error}=await s.rpc("is_platform_admin");if(error||!ok)redirect("/admin");return {supabase:s,user};}
