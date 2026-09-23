@@ -1,0 +1,5 @@
+"use server";
+import { revalidatePath } from "next/cache"; import { createClient } from "@/lib/supabase/server";
+async function ctx(){const s=await createClient();const {data:{user}}=await s.auth.getUser();if(!user)throw new Error("Unauthorized");const {data:m}=await s.from("school_memberships").select("school_id").eq("user_id",user.id).eq("active",true).limit(1).single();return {s,id:m!.school_id};}
+export async function addClass(f:FormData){const {s,id}=await ctx();const name=String(f.get("name")||"").trim();if(name)await s.from("classes").insert({school_id:id,name,sort_order:Number(f.get("sort_order")||0)});revalidatePath("/admin/classes");}
+export async function addSection(f:FormData){const {s,id}=await ctx();const name=String(f.get("name")||"").trim(),class_id=String(f.get("class_id")||"");if(name&&class_id)await s.from("sections").insert({school_id:id,class_id,name});revalidatePath("/admin/classes");}
