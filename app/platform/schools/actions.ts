@@ -1,0 +1,2 @@
+"use server";import {revalidatePath} from "next/cache";import {requirePlatformAdmin} from "@/lib/platform-auth";
+export async function setSubscription(f:FormData){const {supabase:s}=await requirePlatformAdmin();const school_id=String(f.get("school_id")),plan_id=String(f.get("plan_id")),status=String(f.get("status"));const {error}=await s.from("school_subscriptions").upsert({school_id,plan_id,status,updated_at:new Date().toISOString()},{onConflict:"school_id"});if(error)throw new Error(error.message);revalidatePath("/platform");revalidatePath("/platform/schools")}
