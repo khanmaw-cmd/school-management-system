@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { requireSchoolUser } from "@/lib/auth";
 import { saveAttendance } from "./actions";
 
 export default async function Page({
@@ -7,18 +7,7 @@ export default async function Page({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const q = await searchParams;
-  const s = await createClient();
-  const {
-    data: { user },
-  } = await s.auth.getUser();
-  const { data: m } = await s
-    .from("school_memberships")
-    .select("school_id")
-    .eq("user_id", user!.id)
-    .eq("active", true)
-    .limit(1)
-    .single();
-  const school = m!.school_id;
+  const { supabase: s, school: schoolRow } = await requireSchoolUser(["school_owner","principal","teacher"]);\n  const school = schoolRow!.id;
   const date = q.date || new Date().toISOString().slice(0, 10);
 
   const [{ data: years }, { data: classes }, { data: sections }] =
