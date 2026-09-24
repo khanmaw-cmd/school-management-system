@@ -7,7 +7,8 @@ export default async function Page({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const q = await searchParams;
-  const { supabase: s, school: schoolRow } = await requireSchoolUser(["school_owner","principal","teacher"]);\n  const school = schoolRow!.id;
+  const { supabase: s, school: schoolRow } = await requireSchoolUser(["school_owner","principal","teacher"]);
+  const school = schoolRow!.id;
   const date = q.date || new Date().toISOString().slice(0, 10);
 
   const [{ data: years }, { data: classes }, { data: sections }] =
