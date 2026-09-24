@@ -61,7 +61,7 @@ export default async function Page() {
       .from("admission_enquiries")
       .select("*", { count: "exact", head: true })
       .eq("school_id", id)
-      .in("status", ["new", "contacted", "visited"]),
+      .in("status", ["new", "contacted", "follow_up"]),
   ]);
 
   const collected = (payments || []).reduce((n, x) => n + Number(x.amount), 0);
@@ -133,9 +133,11 @@ export default async function Page() {
                 ["Outstanding dues", "/admin/fees/dues"],
                 ["Student ledger", "/admin/fees/ledger"],
                 ["HR & payroll", "/admin/hr"],
-                ["Admissions",
+                [
+                  "Admissions",
                   "/admin/enquiries",
-                  openEnquiries ? `${openEnquiries} open` : null],
+                  openEnquiries ? `${openEnquiries} open` : null,
+                ],
               ].map((row) => {
                 const [n, h, badge] = row as [string, string, string | null];
                 return (
