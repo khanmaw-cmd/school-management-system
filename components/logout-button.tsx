@@ -1,2 +1,2 @@
-"use client";import {createClient} from "@/lib/supabase/client";
-export default function LogoutButton(){return <button onClick={async()=>{await createClient().auth.signOut();location.href="/login"}} className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-slate-50">Sign out</button>}
+"use client";import {useRouter} from "next/navigation";import {createClient} from "@/lib/supabase/client";
+export default function LogoutButton(){const router=useRouter();return <button onClick={async()=>{await createClient().auth.signOut();router.replace("/login");router.refresh()}} className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-slate-50">Sign out</button>}
