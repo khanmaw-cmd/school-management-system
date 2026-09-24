@@ -36,6 +36,7 @@ Key late migrations:
 | 039 | Atomic fee adjustments |
 | 040 | Salary history / effective-date payroll |
 | 041 | Payment↔student + exam enrollment guards |
+| 042 | Per-user active school context + RLS |
 | 042 | Active school preference (multi-school users) |
 
 ## 3. Auth & storage
