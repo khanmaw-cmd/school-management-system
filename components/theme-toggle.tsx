@@ -1,0 +1,3 @@
+"use client";import {useEffect,useState} from "react";
+const key="school-ui-theme";
+export default function ThemeToggle(){const [dark,setDark]=useState(false);useEffect(()=>{const v=localStorage.getItem(key)==="dark";setDark(v);document.documentElement.dataset.theme=v?"dark":"light"},[]);function toggle(){const v=!dark;setDark(v);document.documentElement.dataset.theme=v?"dark":"light";localStorage.setItem(key,v?"dark":"light")}return <button type="button" onClick={toggle} aria-label={dark?"Use light mode":"Use dark mode"} className="rounded-xl border px-3 py-2 text-sm">{dark?"Light":"Dark"}</button>}
