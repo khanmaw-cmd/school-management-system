@@ -14,18 +14,15 @@ This is the highest-priority production gate. Application CI being green does **
 From a clean database:
 
 ```bash
-# Using Supabase CLI (recommended)
 supabase link --project-ref <project-ref>
 supabase db push
-# or apply files 001 → 041 sequentially via SQL editor / migration runner
+# or apply files 001 → 042 sequentially via SQL editor
 ```
 
-Confirm all of:
+Confirm:
 
-- `001_initial_schema.sql` … `041_deeper_finance_exam_integrity.sql` applied with no errors
-- **Unique sequence only** (no duplicate numbers): 001–041
+- `001` … `042_active_school_context.sql` applied with **no duplicate numbers**
 - No leftover objects from other apps
-- Migration list shows 001–041 as applied
 
 Key late migrations:
 
@@ -39,50 +36,47 @@ Key late migrations:
 | 039 | Atomic fee adjustments |
 | 040 | Salary history / effective-date payroll |
 | 041 | Payment↔student + exam enrollment guards |
+| 042 | Active school preference (multi-school users) |
 
 ## 3. Auth & storage
 
-- [ ] Email auth enabled; confirm redirect URLs for production domain
-- [ ] Private storage buckets for student documents / certificates
-- [ ] Storage policies scoped by `school_id` / role helpers
-- [ ] JWT expiry and refresh settings reviewed
+- [ ] Email auth enabled; production redirect URLs set
+- [ ] Private storage for documents / certificates
+- [ ] Storage policies scoped by school / role
+- [ ] JWT / session settings reviewed
 
 ## 4. RLS & tenant isolation tests
 
-Run (manually or via script) against two test schools A and B:
+Two test schools A and B:
 
-- [ ] User in school A cannot `SELECT` students/fees/exams of school B (even with known UUIDs)
-- [ ] Teacher assignment RPC rejects cross-school staff/class IDs
-- [ ] Fee payment / payroll / adjustment RPCs reject foreign `school_id`
-- [ ] Communications delivery cannot target other-school recipients
-- [ ] Platform admin path is separate and audited
+- [ ] User in A cannot read B’s students/fees/exams (even with known UUIDs)
+- [ ] Multi-school user: switcher only lists active memberships; preference cannot point at non-member school
+- [ ] Teacher assignment / fee / payroll RPCs reject foreign `school_id`
+- [ ] Communications cannot target other-school recipients
+- [ ] Platform admin path separate and audited
 
 ## 5. Advisors & performance
 
-In Supabase dashboard:
-
-- [ ] Security Advisor: resolve critical/high findings
-- [ ] Performance Advisor: add missing indexes called out for hot paths (attendance, fees, notifications)
-- [ ] Enable slow query logging in staging first
+- [ ] Security Advisor: clear critical/high
+- [ ] Performance Advisor: indexes on attendance, fees, notifications
+- [ ] Slow query logging on staging first
 
 ## 6. Seed & role matrix
 
-- [ ] Seed one demo school with Owner, Principal, Teacher, Accountant, Reception, Parent, Student
-- [ ] Walk each role dashboard and one critical write path
-- [ ] Confirm module enable/disable blocks UI **and** Server Actions
+- [ ] Demo school: Owner, Principal, Teacher, Accountant, Reception, Parent, Student
+- [ ] Multi-school user with two memberships — switch and confirm data isolation
+- [ ] Module enable/disable blocks UI **and** Server Actions
 
 ## 7. Backup / restore drill
 
-- [ ] Take a backup
-- [ ] Restore into a throwaway project
-- [ ] Confirm migrations + RLS still hold after restore
+- [ ] Backup → restore to throwaway project → RLS still holds
 
 ## 8. App wiring
 
-- [ ] Production env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- [ ] Service role only on server (if used) — never exposed to client
-- [ ] Staging environment mirrors production migration set
+- [ ] `NEXT_PUBLIC_SUPABASE_URL` / `ANON_KEY` / `APP_URL`
+- [ ] Service role server-only if used
+- [ ] Staging mirrors production migration set
 
 ## Sign-off
 
-Only after this checklist is complete should schools be invited to depend on the system daily.
+Only after this checklist is complete should schools depend on the system daily.
