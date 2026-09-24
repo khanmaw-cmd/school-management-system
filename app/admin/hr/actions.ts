@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { requireSchoolModule, requireSchoolUser } from "@/lib/auth";
+import { requireSchoolModule } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 
 const finance = () => requireSchoolModule("hr_payroll", ["school_owner", "principal", "accountant"]);
