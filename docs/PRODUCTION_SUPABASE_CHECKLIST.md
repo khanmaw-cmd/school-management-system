@@ -78,6 +78,10 @@ Two test schools A and B:
 - [ ] Service role server-only if used
 - [ ] Staging mirrors production migration set
 
+## 9. End-to-end role proof
+
+Run **[E2E_ROLE_SMOKE_TEST.md](./E2E_ROLE_SMOKE_TEST.md)** against the dedicated project and record the commit SHA/project ref used for the test.
+
 ## Sign-off
 
 Only after this checklist is complete should schools depend on the system daily.
