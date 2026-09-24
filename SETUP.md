@@ -27,7 +27,7 @@ npm install --package-lock-only   # then commit package-lock.json
 1. Create a new Supabase project (region near your schools).
 2. Apply **all** SQL files in order:
 
-   `supabase/migrations/001_*.sql` → `037_*.sql`
+   `supabase/migrations/001_*.sql` → `042_*.sql`
 
    Prefer Supabase CLI (`supabase db push`) or run each file in SQL Editor in numeric order.
 
@@ -73,7 +73,8 @@ Open http://localhost:3000
 4. Fees: plan → bulk generate charges → collect → open receipt  
 5. Exams: create → marks → lock/publish  
 6. Teacher workspace: today’s periods  
-7. Portal: link parent `user_id` → child dashboard + timetable  
+7. Multi-school user: switch active school and confirm dashboards/actions follow the selected school  
+8. Portal: link parent `user_id` → child dashboard + timetable  
 
 ---
 
