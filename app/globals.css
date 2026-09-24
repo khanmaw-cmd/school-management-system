@@ -53,3 +53,44 @@ button:not(:disabled), [role="button"]:not([aria-disabled="true"]) { cursor: poi
   a { color: #000 !important; text-decoration: none !important; }
   @page { margin: 12mm; }
 }
+
+
+/* Launch UI system: consistent ERP surfaces without changing workflow semantics. */
+main > div[class*="max-w"] > h1,
+main > div[class*="max-w"] > div > h1 {
+  letter-spacing: -0.025em;
+  color: #0f172a;
+}
+main section[class*="border"][class*="bg-white"],
+main div[class*="rounded-2xl"][class*="border"][class*="bg-white"] {
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 2px rgb(15 23 42 / .035);
+}
+main input:not([type="checkbox"]):not([type="radio"]),
+main select,
+main textarea {
+  min-height: 2.75rem;
+  border-color: #cbd5e1;
+  background: #fff;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+main input:not([type="checkbox"]):not([type="radio"]):focus,
+main select:focus,
+main textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgb(59 130 246 / .12);
+  outline: none;
+}
+main table { width: 100%; border-collapse: separate; border-spacing: 0; }
+main th { color: #64748b; font-size: .75rem; font-weight: 600; letter-spacing: .025em; text-align: left; }
+main th, main td { padding: .75rem; border-bottom: 1px solid #e2e8f0; }
+main tbody tr { transition: background-color .12s ease; }
+main tbody tr:hover { background: #f8fafc; }
+main button, main a[class*="rounded"] { transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease; }
+main button:active:not(:disabled), main a[class*="rounded"]:active { transform: translateY(1px); }
+@media (max-width: 640px) {
+  main { overflow-x: hidden; }
+  main > div[class*="max-w"] { width: 100%; }
+  main table { font-size: .875rem; }
+  main th, main td { padding: .625rem .5rem; }
+}
