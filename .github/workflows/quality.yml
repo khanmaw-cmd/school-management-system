@@ -5,6 +5,35 @@ on:
   pull_request:
 
 jobs:
+  migration-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate migration sequence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort)
+          test "${#files[@]}" -gt 0
+          declare -A seen
+          expected=1
+          for file in "${files[@]}"; do
+            number="${file%%_*}"
+            if [[ ! "$number" =~ ^[0-9]{3}$ ]]; then
+              echo "Invalid migration filename: $file"; exit 1
+            fi
+            if [[ -n "${seen[$number]:-}" ]]; then
+              echo "Duplicate migration number $number: ${seen[$number]} and $file"; exit 1
+            fi
+            seen[$number]="$file"
+            printf -v wanted '%03d' "$expected"
+            if [[ "$number" != "$wanted" ]]; then
+              echo "Migration sequence gap: expected $wanted, found $number ($file)"; exit 1
+            fi
+            expected=$((expected + 1))
+          done
+          echo "Migration sequence valid: 001–$(printf '%03d' $((expected - 1)))"
+
   lint-build:
     runs-on: ubuntu-latest
     env:
@@ -12,21 +41,18 @@ jobs:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ]; then
             npm ci --no-audit --no-fund
           else
+            echo "::warning::package-lock.json is missing; using npm install until the lockfile is committed."
             npm install --no-audit --no-fund
           fi
-
       - name: Lint
         run: npm run lint
-
       - name: Build
         run: npm run build
