@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+const dayNames = ["", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 export default async function StudentPortal({
   params,
 }: {
@@ -70,6 +72,7 @@ export default async function StudentPortal({
   );
 
   let hw: any[] = [];
+  let timetable: any[] = [];
   if (enroll) {
     let q = s
       .from("homework")
@@ -83,6 +86,22 @@ export default async function StudentPortal({
     q = q.order("created_at", { ascending: false }).limit(10);
     const { data } = await q;
     hw = data || [];
+
+    let tq = s
+      .from("timetable_entries")
+      .select(
+        "id,weekday,starts_at,ends_at,room,subjects(name),staff(full_name)"
+      )
+      .eq("school_id", st.school_id)
+      .eq("academic_year_id", enroll.academic_year_id)
+      .eq("class_id", enroll.class_id)
+      .order("weekday")
+      .order("starts_at");
+    if (enroll.section_id) {
+      tq = tq.or("section_id.is.null,section_id.eq." + enroll.section_id);
+    }
+    const { data: tt } = await tq;
+    timetable = tt || [];
   }
 
   const count = (v: string) => att?.filter((x) => x.status === v).length || 0;
@@ -100,6 +119,9 @@ export default async function StudentPortal({
     (n: number, x: any) => n + x.remaining,
     0
   );
+
+  const todayWeekday = new Date().getDay() || 7;
+  const todayPeriods = timetable.filter((x) => x.weekday === todayWeekday);
 
   return (
     <main className="min-h-screen bg-slate-50 p-6 md:p-10">
@@ -128,6 +150,27 @@ export default async function StudentPortal({
             </div>
           ))}
         </div>
+
+        {todayPeriods.length > 0 && (
+          <section className="mt-6 rounded-2xl border bg-white p-5">
+            <h2 className="text-lg font-semibold">Today&apos;s timetable</h2>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {todayPeriods.map((x: any) => (
+                <div key={x.id} className="rounded-xl border p-3 text-sm">
+                  <b>{x.subjects?.name}</b>
+                  <p className="text-slate-500">
+                    {String(x.starts_at).slice(0, 5)}–
+                    {String(x.ends_at).slice(0, 5)}
+                    {x.room ? ` · ${x.room}` : ""}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {x.staff?.full_name || ""}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
           <section className="rounded-2xl border bg-white p-5">
@@ -201,6 +244,38 @@ export default async function StudentPortal({
               ))
             ) : (
               <p className="mt-3 text-sm text-slate-500">No payments yet.</p>
+            )}
+          </section>
+
+          <section className="rounded-2xl border bg-white p-5 lg:col-span-2">
+            <h2 className="text-lg font-semibold">Weekly timetable</h2>
+            {timetable.length ? (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3, 4, 5, 6].map((d) => {
+                  const periods = timetable.filter((x) => x.weekday === d);
+                  if (!periods.length) return null;
+                  return (
+                    <div key={d} className="rounded-xl border p-3">
+                      <p className="text-sm font-semibold text-slate-700">
+                        {dayNames[d]}
+                      </p>
+                      {periods.map((x: any) => (
+                        <div key={x.id} className="mt-2 text-sm">
+                          <b>{x.subjects?.name}</b>
+                          <p className="text-xs text-slate-500">
+                            {String(x.starts_at).slice(0, 5)}–
+                            {String(x.ends_at).slice(0, 5)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500">
+                Timetable not published for this class yet.
+              </p>
             )}
           </section>
 
