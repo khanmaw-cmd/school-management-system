@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireSchoolModule } from "@/lib/auth";
+import PrintButton from "@/components/print-button";
 
 export default async function ReceiptPage({
   params,
@@ -33,17 +34,11 @@ export default async function ReceiptPage({
   return (
     <main className="min-h-screen bg-slate-100 p-6 print:bg-white print:p-0">
       <div className="mx-auto max-w-2xl">
-        <div className="mb-4 flex gap-3 print:hidden">
+        <div className="mb-4 flex flex-wrap items-center gap-3 print:hidden">
           <Link href="/admin/fees" className="text-sm text-blue-700">
             ← Finance
           </Link>
-          <button
-            type="button"
-            className="text-sm text-slate-600"
-            // print via browser
-          >
-            Use browser Print for PDF
-          </button>
+          <PrintButton />
         </div>
 
         <article className="rounded-2xl border bg-white p-8 shadow-sm print:border-0 print:shadow-none">
@@ -74,7 +69,7 @@ export default async function ReceiptPage({
               <dd className="font-semibold capitalize">{payment.payment_method}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Reference</dt>
+              <dt className="text-slate-500">Reference / UTR</dt>
               <dd className="font-semibold">{payment.reference_no || "—"}</dd>
             </div>
           </dl>
@@ -102,6 +97,16 @@ export default async function ReceiptPage({
                   </tr>
                 );
               })}
+              {!allocs.length && (
+                <tr className="border-b">
+                  <td className="py-3" colSpan={2}>
+                    Fee payment
+                  </td>
+                  <td className="py-3 text-right">
+                    ₹{Number(payment.amount).toLocaleString("en-IN")}
+                  </td>
+                </tr>
+              )}
             </tbody>
             <tfoot>
               <tr>
