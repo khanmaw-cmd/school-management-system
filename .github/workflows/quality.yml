@@ -44,14 +44,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install dependencies
+      - name: Require package-lock.json
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci --no-audit --no-fund
-          else
-            echo "::warning::package-lock.json is missing; using npm install until the lockfile is committed."
-            npm install --no-audit --no-fund
+          if [ ! -f package-lock.json ]; then
+            echo "::error::package-lock.json is required for deterministic builds."
+            echo "Run: npm install --package-lock-only --registry=https://registry.npmjs.org/"
+            echo "Then commit package-lock.json."
+            exit 1
           fi
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
       - name: Lint
         run: npm run lint
       - name: Build
