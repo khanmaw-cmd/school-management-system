@@ -33,7 +33,7 @@ export async function saveSalary(f: FormData) {
       deductions,
       effective_from: String(f.get("effective")),
     },
-    { onConflict: "staff_id" }
+    { onConflict: "staff_id,effective_from" }
   );
   if (error) throw new Error(error.message);
 
