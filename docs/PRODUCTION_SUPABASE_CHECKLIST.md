@@ -17,14 +17,28 @@ From a clean database:
 # Using Supabase CLI (recommended)
 supabase link --project-ref <project-ref>
 supabase db push
-# or apply files 001 → 035 sequentially via SQL editor / migration runner
+# or apply files 001 → 041 sequentially via SQL editor / migration runner
 ```
 
 Confirm all of:
 
-- `001_initial_schema.sql` … `035_attendance_half_day.sql` applied with no errors
+- `001_initial_schema.sql` … `041_deeper_finance_exam_integrity.sql` applied with no errors
+- **Unique sequence only** (no duplicate numbers): 001–041
 - No leftover objects from other apps
-- `supabase migration list` (or equivalent) shows 001–035 as applied
+- Migration list shows 001–041 as applied
+
+Key late migrations:
+
+| # | Purpose |
+|---|--------|
+| 034 | Atomic payroll generation |
+| 035 | Attendance half-day |
+| 036 | Exam marks lock + publish |
+| 037 | Bulk fee charges from plan |
+| 038 | Published exam marks guard |
+| 039 | Atomic fee adjustments |
+| 040 | Salary history / effective-date payroll |
+| 041 | Payment↔student + exam enrollment guards |
 
 ## 3. Auth & storage
 
@@ -39,7 +53,7 @@ Run (manually or via script) against two test schools A and B:
 
 - [ ] User in school A cannot `SELECT` students/fees/exams of school B (even with known UUIDs)
 - [ ] Teacher assignment RPC rejects cross-school staff/class IDs
-- [ ] Fee payment / payroll RPCs reject foreign `school_id`
+- [ ] Fee payment / payroll / adjustment RPCs reject foreign `school_id`
 - [ ] Communications delivery cannot target other-school recipients
 - [ ] Platform admin path is separate and audited
 
