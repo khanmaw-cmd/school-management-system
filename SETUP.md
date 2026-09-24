@@ -1,10 +1,10 @@
-# School Management System — Setup & Deploy Guide
+# School Management System — Setup & Deploy
 
 ## Prerequisites
 
-- Node.js 18+ (20+ recommended)
-- npm or pnpm
-- Free accounts: [Supabase](https://supabase.com), [Vercel](https://vercel.com), [GitHub](https://github.com)
+- Node.js 20+ recommended
+- npm
+- Accounts: [Supabase](https://supabase.com), [Vercel](https://vercel.com), [GitHub](https://github.com)
 
 ---
 
@@ -14,37 +14,38 @@
 git clone https://github.com/khanmaw-cmd/school-management-system.git
 cd school-management-system
 npm install
+# Recommended for production CI:
+npm install --package-lock-only   # then commit package-lock.json
 ```
 
 ---
 
-## 2. Create Supabase project
+## 2. Dedicated Supabase project
 
-1. Go to [supabase.com](https://supabase.com) → **New project**
-2. Note the **Project URL** and **anon public** key (Settings → API)
-3. Open **SQL Editor** → New query
-4. Paste the **entire** contents of:
+**Do not** reuse another product’s database.
 
-   `supabase/migrations/001_initial_schema.sql`
+1. Create a new Supabase project (region near your schools).
+2. Apply **all** SQL files in order:
 
-5. Run the query (should complete without errors)
+   `supabase/migrations/001_*.sql` → `037_*.sql`
 
-### Auth settings (recommended for testing)
+   Prefer Supabase CLI (`supabase db push`) or run each file in SQL Editor in numeric order.
 
-- Authentication → Providers → Email: enable
-- Authentication → Settings:
-  - Disable **Confirm email** for local/dev (enable in production)
-  - Site URL: `http://localhost:3000` (and later your Vercel URL)
+3. Confirm no errors; see **[docs/PRODUCTION_SUPABASE_CHECKLIST.md](./docs/PRODUCTION_SUPABASE_CHECKLIST.md)** for RLS and cross-tenant tests.
+
+### Auth (dev)
+
+- Email provider enabled
+- Disable “Confirm email” only for local testing
+- Site URL: `http://localhost:3000` (add Vercel URL later)
 
 ---
 
-## 3. Environment variables
+## 3. Environment
 
 ```bash
 cp .env.example .env.local
 ```
-
-Edit `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
@@ -52,7 +53,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-**Never commit** `.env.local` or service role keys.
+Never commit service role keys.
 
 ---
 
@@ -62,47 +63,42 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open http://localhost:3000
 
-### First-time flow
+### Smoke path
 
-1. **Sign up** with your email  
-2. **School Setup** → create school (you become `school_owner`)  
-3. **Academic Years** → create e.g. `2025-26` and set current  
-4. **Classes** → add classes + sections  
-5. **Subjects** → Maths, English, etc.  
-6. **Teachers** → add + allocate  
-7. **Students** → register (with guardian)  
-8. **Attendance / Fees / Exams / Notices** as needed  
-9. **Parent portal**: `/portal` (link guardian `user_id` in Supabase)
+1. Sign up → create school  
+2. Academic year, classes, subjects, teachers, students  
+3. Attendance (including half-day)  
+4. Fees: plan → bulk generate charges → collect → open receipt  
+5. Exams: create → marks → lock/publish  
+6. Teacher workspace: today’s periods  
+7. Portal: link parent `user_id` → child dashboard + timetable  
 
 ---
 
-## 5. Deploy to Vercel
+## 5. Vercel deploy
 
-1. Push repo to GitHub
-2. [vercel.com](https://vercel.com) → **Add New Project** → import the repo
-3. Set environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_APP_URL` = `https://your-app.vercel.app`
-4. Deploy
-5. Supabase Auth → Site URL + Redirect URLs = your Vercel domain
+1. Import GitHub repo  
+2. Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`  
+3. Supabase Auth → Site URL + redirect URLs = production domain  
 
 ---
 
-## 6. Parent portal linking
+## 6. Parent linking
 
 ```sql
 UPDATE guardians
-SET user_id = '<uuid-from-auth.users>'
+SET user_id = '<auth.users uuid>'
 WHERE email = 'parent@example.com';
 ```
 
-Parent opens: `/portal`
+Parent opens `/portal`.
 
 ---
 
-## Modules included
+## Module keys (enable/disable)
 
-Auth · Multi-school · School setup · Dashboard · Classes/Sections · Subjects · Academic years · Teachers + allocation · Students · Attendance · Fees · Exams + report cards · Notices · Parent portal
+`academics` · `fees` · `exams` · `communications` · `library` · `transport` · `assets` · `hr_payroll` · `health` · `visitors`
+
+Server Actions and nav respect these flags.
